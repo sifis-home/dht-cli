@@ -36,7 +36,7 @@ async fn print_peers(_args: ArgMatches, dht: &mut Cache) -> Result<Option<String
     Ok(Some(out))
 }
 
-fn print_dht(_args: ArgMatches, dht: &mut Cache) -> Result<Option<String>, CliError> {
+fn print_dht(_args: ArgMatches, _dht: &mut Cache) -> Result<Option<String>, CliError> {
     todo!("TBD");
     //    let out = serde_json::to_string_pretty(&dht.).unwrap();
     //    Ok(Some(out))
@@ -45,7 +45,7 @@ fn print_dht(_args: ArgMatches, dht: &mut Cache) -> Result<Option<String>, CliEr
 async fn send_volatile(args: ArgMatches, dht: &mut Cache) -> Result<Option<String>, CliError> {
     let v = args.get_one::<Value>("value").unwrap();
 
-    dht.send(v)?;
+    dht.send(v.to_owned())?;
 
     Ok(None)
 }
@@ -178,19 +178,19 @@ async fn main() -> Result<(), anyhow::Error> {
     use reedline_repl_rs::Error;
 
     tokio::task::spawn(async move {
+        use sifis_dht::cache::Event;
         let mut events = std::pin::pin!(events);
         while let Some(ev) = events.next().await {
             match ev {
-                DomoEvent::NewPeers(peers) => {
-                    println!("Found peers {peers:?}");
+                Event::ReadyPeers(peers) => {
+                    println!("Peers ready {peers:?}");
                 }
-                DomoEvent::VolatileData(data) => {
+                Event::VolatileData(data) => {
                     println!("Got data {data:#?}");
                 }
-                DomoEvent::PersistentData(elem) => {
+                Event::PersistentData(elem) => {
                     println!("Got elem {elem:#?}");
                 }
-                _ => {}
             }
         }
     });
