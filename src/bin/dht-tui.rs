@@ -7,8 +7,8 @@ use sifis_dht::Config;
 use reedline_repl_rs::clap::{value_parser, Arg, ArgMatches, Command};
 use reedline_repl_rs::Repl;
 use serde_json::Value;
-use sifis_dht::domocache::DomoEvent;
 use tokio_stream::StreamExt;
+use tracing::debug;
 
 #[derive(Debug, thiserror::Error)]
 enum CliError {
@@ -183,13 +183,13 @@ async fn main() -> Result<(), anyhow::Error> {
         while let Some(ev) = events.next().await {
             match ev {
                 Event::ReadyPeers(peers) => {
-                    println!("Peers ready {peers:?}");
+                    debug!("Peers ready {peers:?}");
                 }
                 Event::VolatileData(data) => {
-                    println!("Got data {data:#?}");
+                    debug!("Got data {data:#?}");
                 }
                 Event::PersistentData(elem) => {
-                    println!("Got elem {elem:#?}");
+                    debug!("Got elem {elem:#?}");
                 }
             }
         }
